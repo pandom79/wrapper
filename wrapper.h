@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/time.h>
+#include <stddef.h>
 
 /* Types */
 typedef struct {
