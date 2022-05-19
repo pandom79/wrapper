@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <sys/time.h>
 #include <stddef.h>
+#include <errno.h>
 
 /* Types */
 typedef struct {
@@ -51,7 +52,6 @@ void stringReplaceStr(char **, const char *, const char *);
 void stringReplaceAllStr(char **, const char *, const char *);
 void objectRelease(void **);
 Array* stringSplit(char *str, const char *sep, bool);
-void stringSetDateTime(char **, bool);
 
 /* Array */
 Array* arrayNew(void (*)(void **));
@@ -66,5 +66,10 @@ bool arrayContainsStr(Array *, const char *);
 Array* arrayStrCopy(Array *);
 void* arrayGet(Array *, int);
 int arrayGetIdx(Array *, void *element);
+
+/* Date time */
+int msleep(long);
+void printDiffTime(double);
+void stringSetDateTime(char **, bool);
 
 #endif // WRAPPER_H

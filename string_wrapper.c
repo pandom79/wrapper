@@ -454,30 +454,3 @@ stringSplit(char *str, const char *sep, bool allocElements)
     }
     return NULL;
 }
-
-void
-stringSetDateTime(char **ret, bool hasMilliseconds)
-{
-    int millisec;
-    char millisecStr[5];
-    struct tm* timeInfo;
-    struct timeval tv;
-    char dateTime[50];
-
-    gettimeofday(&tv, NULL);
-
-    timeInfo = localtime(&tv.tv_sec);
-    strftime(dateTime, 50, "%d %B %Y %H:%M:%S", timeInfo);
-    if (hasMilliseconds) {
-        millisec = tv.tv_usec/1000.0;
-        if (millisec >= 1000) {
-            millisec -= 1000;
-            tv.tv_sec++;
-        }
-        sprintf(millisecStr, ".%03d", millisec);
-        strcat(dateTime, millisecStr);
-    }
-    objectRelease(ret);
-    *ret = stringNew(dateTime);
-}
-
