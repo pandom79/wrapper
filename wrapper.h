@@ -79,6 +79,7 @@ int msleep(long);
 void stringSetDateTime(char **, bool);
 DateTime* dateTimeCreate(DateTime *);
 void dateTimeRelease(DateTime **);
+void dateTimeSet(DateTime **);
 void stringSetCurrentTime(char **, DateTime *, bool);
 void stringSetDiffTime(char **, double, DateTime *, DateTime *);
 

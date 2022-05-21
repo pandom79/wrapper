@@ -46,6 +46,9 @@ int main()
     DateTime *dateTime = dateTimeCreate(NULL);
     *dateTime->sec = mktime(localTime);
 
+    dateTimeSet(&dateTime);
+
+
     char *date = NULL;
     stringSetCurrentTime(&date, dateTime, true);
 
@@ -67,30 +70,8 @@ int main()
     printf("diffTimeStr = %s\n", diffTimeStr);
     objectRelease(&diffTimeStr);
 
-//    unsigned long diffMillisec;
-//    if (diffTimeLong > 0) {
-//        diffMillisec = (1000 - *dateTime->millisec + *dateTime2->millisec);
-//        printf("diffMillisec = %ld\n", diffMillisec);
-//        if (diffMillisec < 1000)
-//            diffTimeLong--;
-//        else
-//            diffMillisec = diffMillisec - 1000;
-//    }
-//    else {
-//        diffMillisec = *dateTime2->millisec - *dateTime->millisec;
-//        printf("0.%ldsec", diffMillisec);
-//    }
-
-//    DateTime *dateTimeDiff = dateTimeCreate(NULL);
-//    *dateTimeDiff->sec = diffTimeLong;
-//    *dateTimeDiff->millisec = diffMillisec;
-
-//    stringSetCurrentTime(&date, dateTimeDiff, true);
-//    printf("Date time diff 2 = %s\n", date);
-
     dateTimeRelease(&dateTime2);
     dateTimeRelease(&dateTime);
-//    dateTimeRelease(&dateTimeDiff);
     objectRelease(&date);
 
 

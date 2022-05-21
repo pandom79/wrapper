@@ -101,6 +101,15 @@ dateTimeRelease(DateTime **dateTime)
 }
 
 void
+dateTimeSet(DateTime **dateTime)
+{
+    if (*dateTime)
+        dateTimeRelease(dateTime);
+    *dateTime = dateTimeCreate(NULL);
+}
+
+
+void
 stringSetCurrentTime(char **ret, DateTime *dateTime, bool hasMilliseconds)
 {
     char dateTimeStr[50];
