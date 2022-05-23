@@ -39,40 +39,51 @@ int main()
     struct tm *localTime = localtime(&now);
 //    localTime->tm_mday -= 4;
 //    localTime->tm_mon -= 3;
-    localTime->tm_hour -= 500;
-    localTime->tm_min -= 43;
+    localTime->tm_hour -= 48;
+//    localTime->tm_min -= 43;
 //    localTime->tm_sec -= 23000;
 
-    DateTime *dateTime = dateTimeCreate(NULL);
+    Time *dateTime = timeNew(NULL);
     *dateTime->sec = mktime(localTime);
 
-    dateTimeSet(&dateTime);
+//    dateTimeSet(&dateTime);
 
 
     char *date = NULL;
-    stringSetCurrentTime(&date, dateTime, true);
-
+    stringSetTimeStamp(&date, dateTime, true);
     printf("Date = %s\n", date);
 
-    msleep(105);
+    msleep(540);
 
 
 //TIME 2
-    DateTime *dateTime2 = dateTimeCreate(NULL);
-    stringSetCurrentTime(&date, dateTime2, true);
+    Time *dateTime2 = timeNew(NULL);
+    stringSetTimeStamp(&date, dateTime2, true);
+
     printf("Date2 = %s\n", date);
 
 //TIME DIFF
 
-    long diffTimeLong = difftime(*dateTime2->sec, *dateTime->sec);
+//    long diffTimeLong = difftime(*dateTime2->sec, *dateTime->sec);
     char *diffTimeStr = NULL;
-    stringSetDiffTime(&diffTimeStr, diffTimeLong, dateTime2, dateTime);
+    stringSetDiffTime(&diffTimeStr, dateTime2, dateTime);
     printf("diffTimeStr = %s\n", diffTimeStr);
     objectRelease(&diffTimeStr);
 
-    dateTimeRelease(&dateTime2);
-    dateTimeRelease(&dateTime);
+    timeRelease(&dateTime2);
+    timeRelease(&dateTime);
     objectRelease(&date);
 
+
+    //TIME 3
+    msleep(540);
+    char *date3 = NULL;
+    stringSetTimeStamp(&date3, NULL, true);
+    printf("Date3 = %s\n", date3);
+
+    stringSetTimeStamp(&date3, NULL, false);
+    printf("Date3 without millisec = %s\n", date3);
+
+    objectRelease(&date3);
 
 }

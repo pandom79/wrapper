@@ -11,7 +11,6 @@
 #include <sys/time.h>
 #include <stddef.h>
 #include <errno.h>
-#include <stdint.h>
 
 /* Types */
 typedef struct {
@@ -70,17 +69,17 @@ int arrayGetIdx(Array *, void *element);
 
 /* Date time */
 typedef struct {
-    int32_t *sec;
-    int32_t *millisec;
-} DateTime;
+    long *sec;
+    long *millisec;
+} Time;
 
 int msleep(long);
 //FIXME remove function below
 void stringSetDateTime(char **, bool);
-DateTime* dateTimeCreate(DateTime *);
-void dateTimeRelease(DateTime **);
-void dateTimeSet(DateTime **);
-void stringSetCurrentTime(char **, DateTime *, bool);
-void stringSetDiffTime(char **, double, DateTime *, DateTime *);
+Time* timeNew(Time *);
+void timeRelease(Time **);
+void timeSetCurrent(Time **);
+void stringSetTimeStamp(char **, Time *, bool);
+void stringSetDiffTime(char **, Time *, Time *);
 
 #endif // WRAPPER_H
