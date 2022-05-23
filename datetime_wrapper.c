@@ -27,47 +27,21 @@ msleep(long msec)
     return res;
 }
 
-void
-stringSetDateTime(char **ret, bool hasMilliseconds)
+Time*
+timeNew(Time *timeFrom)
 {
-    int millisec;
-    char millisecStr[5];
-    struct tm* timeInfo;
-    struct timeval tv;
-    char dateTime[50];
-
-    gettimeofday(&tv, NULL);
-
-    timeInfo = localtime(&tv.tv_sec);
-    strftime(dateTime, 50, "%d %B %Y %H:%M:%S", timeInfo);
-    if (hasMilliseconds) {
-        millisec = tv.tv_usec/1000.0;
-        if (millisec >= 1000) {
-            millisec -= 1000;
-            tv.tv_sec++;
-        }
-        sprintf(millisecStr, ".%03d", millisec);
-        strcat(dateTime, millisecStr);
-    }
-    objectRelease(ret);
-    *ret = stringNew(dateTime);
-}
-
-DateTime*
-dateTimeCreate(DateTime *dateTimeFrom)
-{
-    DateTime *dateTime = calloc(1, sizeof(DateTime));
-    assert(dateTime);
+    Time *time = calloc(1, sizeof(Time));
+    assert(time);
 
     //Sec
-    int32_t *sec = calloc(1, sizeof(int32_t));
+    long *sec = calloc(1, sizeof(long));
     assert(sec);
 
     //Millisec
-    int32_t *millisec = calloc(1, sizeof(int32_t));
+    long *millisec = calloc(1, sizeof(long));
     assert(millisec);
 
-    if (!dateTimeFrom) {
+    if (!timeFrom) {
         //Timeval
         struct timeval timeVal;
         gettimeofday(&timeVal, NULL);
@@ -79,50 +53,61 @@ dateTimeCreate(DateTime *dateTimeFrom)
         }
     }
     else {
-        *sec = *dateTimeFrom->sec;
-        *millisec = *dateTimeFrom->millisec;
+        *sec = *timeFrom->sec;
+        *millisec = *timeFrom->millisec;
     }
 
-    dateTime->sec = sec;
-    dateTime->millisec = millisec;
+    time->sec = sec;
+    time->millisec = millisec;
 
-    return dateTime;
+    return time;
 }
 
 void
-dateTimeRelease(DateTime **dateTime)
+timeRelease(Time **time)
 {
-    DateTime *dateTimeTemp = *dateTime;
-    if (dateTimeTemp) {
-        objectRelease(&dateTimeTemp->sec);
-        objectRelease(&dateTimeTemp->millisec);
-        objectRelease(&dateTimeTemp);
+    Time *timeTemp = *time;
+    if (timeTemp) {
+        objectRelease(&timeTemp->sec);
+        objectRelease(&timeTemp->millisec);
+        objectRelease(time);
     }
 }
 
 void
-dateTimeSet(DateTime **dateTime)
+timeSetCurrent(Time **time)
 {
-    if (*dateTime)
-        dateTimeRelease(dateTime);
-    *dateTime = dateTimeCreate(NULL);
+    if (*time)
+        timeRelease(time);
+    *time = timeNew(NULL);
 }
 
-
 void
-stringSetCurrentTime(char **ret, DateTime *dateTime, bool hasMilliseconds)
+stringSetTimeStamp(char **ret, Time *time, bool hasMilliseconds)
 {
-    char dateTimeStr[50];
-    char millisecStr[5];
+    char dateTimeStr[50] = {0};
+    char millisecStr[5] = {0};
+    long millisec = 0;
 
     struct timeval tv;
-    tv.tv_sec = *dateTime->sec;
+    if (time) {
+        tv.tv_sec = *time->sec;
+        millisec = *time->millisec;
+    }
+    else {
+        gettimeofday(&tv, NULL);
+        millisec = tv.tv_usec/1000.0;
+        if (millisec >= 1000) {
+            millisec -= 1000;
+            tv.tv_sec++;
+        }
+    }
 
     struct tm *timeInfo = localtime(&tv.tv_sec);
 
     strftime(dateTimeStr, 50, "%d %B %Y %H:%M:%S", timeInfo);
     if (hasMilliseconds) {
-        sprintf(millisecStr, ".%03d", *dateTime->millisec);
+        sprintf(millisecStr, ".%03ld", millisec);
         strcat(dateTimeStr, millisecStr);
     }
     objectRelease(ret);
@@ -130,17 +115,18 @@ stringSetCurrentTime(char **ret, DateTime *dateTime, bool hasMilliseconds)
 }
 
 void
-stringSetDiffTime(char **ret, double diffTime, DateTime *dateTimeEnd, DateTime *dateTimeStart)
+stringSetDiffTime(char **ret, Time *timeEnd, Time *timeStart)
 {
-    char timeStr[50];
+    char timeStr[50] = {0};
     int day, hour, min, sec;
     day = hour = min = sec = -1;
 
-    int32_t *millisecStart = dateTimeStart->millisec;
-    int32_t *millisecEnd = dateTimeEnd->millisec;
+    double diffTime = difftime(*timeEnd->sec, *timeStart->sec);
+    long *millisecStart = timeStart->millisec;
+    long *millisecEnd = timeEnd->millisec;
 
     if (diffTime > 0) {
-        uint32_t diffMillisec = (1000 - *millisecStart + *millisecEnd);
+        long diffMillisec = (1000 - *millisecStart + *millisecEnd);
         if (diffMillisec < 1000)
             diffTime--;
         else
@@ -163,30 +149,30 @@ stringSetDiffTime(char **ret, double diffTime, DateTime *dateTimeEnd, DateTime *
         }
 
         if (day != -1 && day > 0) {
-            char dayStr[10];
+            char dayStr[10] = {0};
             sprintf(dayStr, "%dd ", day);
             strcat(timeStr, dayStr);
         }
         if (hour != -1 && hour > 0) {
-            char hourStr[10];
+            char hourStr[10] = {0};
             sprintf(hourStr, "%dh ", hour);
             strcat(timeStr, hourStr);
         }
         if (min != -1 && min > 0) {
-            char minStr[10];
+            char minStr[10] = {0};
             sprintf(minStr, "%dm ", min);
             strcat(timeStr, minStr);
         }
         if (sec != -1) {
-            char secStr[10];
-            sprintf(secStr, "%d.%ds ", sec, diffMillisec);
+            char secStr[10] = {0};
+            sprintf(secStr, "%d.%lds ", sec, diffMillisec);
             strcat(timeStr, secStr);
         }
 
     }
     else {
-        uint32_t diffMillisec = *millisecEnd - *millisecStart;
-        sprintf(timeStr, "0.%ds", diffMillisec);
+        long diffMillisec = *millisecEnd - *millisecStart;
+        sprintf(timeStr, "0.%lds", diffMillisec);
     }
     objectRelease(ret);
     *ret = stringNew(timeStr);
