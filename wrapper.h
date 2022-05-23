@@ -19,6 +19,11 @@ typedef struct {
     void (*release_fn)(void **);
 } Array;
 
+typedef struct {
+    long *sec;
+    long *millisec;
+} Time;
+
 /* String */
 char* stringNew(const char *);
 bool stringSet(char **, const char *);
@@ -67,15 +72,8 @@ Array* arrayStrCopy(Array *);
 void* arrayGet(Array *, int);
 int arrayGetIdx(Array *, void *element);
 
-/* Date time */
-typedef struct {
-    long *sec;
-    long *millisec;
-} Time;
-
+/* Date and time */
 int msleep(long);
-//FIXME remove function below
-void stringSetDateTime(char **, bool);
 Time* timeNew(Time *);
 void timeRelease(Time **);
 void timeSetCurrent(Time **);

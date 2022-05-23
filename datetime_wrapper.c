@@ -27,32 +27,6 @@ msleep(long msec)
     return res;
 }
 
-void
-stringSetDateTime(char **ret, bool hasMilliseconds)
-{
-    int millisec;
-    char millisecStr[5] = {0};
-    struct tm* timeInfo;
-    struct timeval tv;
-    char dateTime[50] = {0};
-
-    gettimeofday(&tv, NULL);
-
-    timeInfo = localtime(&tv.tv_sec);
-    strftime(dateTime, 50, "%d %B %Y %H:%M:%S", timeInfo);
-    if (hasMilliseconds) {
-        millisec = tv.tv_usec/1000.0;
-        if (millisec >= 1000) {
-            millisec -= 1000;
-            tv.tv_sec++;
-        }
-        sprintf(millisecStr, ".%03d", millisec);
-        strcat(dateTime, millisecStr);
-    }
-    objectRelease(ret);
-    *ret = stringNew(dateTime);
-}
-
 Time*
 timeNew(Time *timeFrom)
 {
@@ -96,7 +70,7 @@ timeRelease(Time **time)
     if (timeTemp) {
         objectRelease(&timeTemp->sec);
         objectRelease(&timeTemp->millisec);
-        objectRelease(&timeTemp);
+        objectRelease(time);
     }
 }
 
