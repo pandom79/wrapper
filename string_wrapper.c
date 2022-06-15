@@ -362,7 +362,7 @@ stringLastIndexOfStr(const char *str, const char *c)
     return -1;
 }
 
-char *
+char*
 stringSub(const char *str, int startIdx, int endIdx) {
 
     char *ret = NULL;
