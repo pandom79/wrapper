@@ -11,6 +11,8 @@
 #include <sys/time.h>
 #include <stddef.h>
 #include <errno.h>
+#include <math.h>
+
 
 /* Types */
 typedef struct {
@@ -21,7 +23,8 @@ typedef struct {
 
 typedef struct {
     long *sec;
-    long *millisec;
+    long *durationSec;
+    long *durationMillisec;
 } Time;
 
 /* String */
@@ -77,7 +80,7 @@ int msleep(long);
 Time* timeNew(Time *);
 void timeRelease(Time **);
 void timeSetCurrent(Time **);
-void stringSetTimeStamp(char **, Time *, bool);
+void stringSetTimeStamp(char **, Time *);
 void stringSetDiffTime(char **, Time *, Time *);
 
 #endif // WRAPPER_H

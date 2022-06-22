@@ -50,7 +50,7 @@ int main()
 
 
     char *date = NULL;
-    stringSetTimeStamp(&date, dateTime, true);
+    stringSetTimeStamp(&date, dateTime);
     printf("Date = %s\n", date);
 
     msleep(540);
@@ -58,7 +58,7 @@ int main()
 
 //TIME 2
     Time *dateTime2 = timeNew(NULL);
-    stringSetTimeStamp(&date, dateTime2, true);
+    stringSetTimeStamp(&date, dateTime2);
 
     printf("Date2 = %s\n", date);
 
@@ -78,10 +78,10 @@ int main()
     //TIME 3
     msleep(540);
     char *date3 = NULL;
-    stringSetTimeStamp(&date3, NULL, true);
+    stringSetTimeStamp(&date3, NULL);
     printf("Date3 = %s\n", date3);
 
-    stringSetTimeStamp(&date3, NULL, false);
+    stringSetTimeStamp(&date3, NULL);
     printf("Date3 without millisec = %s\n", date3);
 
     objectRelease(&date3);
