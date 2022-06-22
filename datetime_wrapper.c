@@ -37,28 +37,41 @@ timeNew(Time *timeFrom)
     long *sec = calloc(1, sizeof(long));
     assert(sec);
 
-    //Millisec
-    long *millisec = calloc(1, sizeof(long));
-    assert(millisec);
+    //Duration sec
+    long *durationSec = calloc(1, sizeof(long));
+    assert(durationSec);
+
+    //Duration milli sec
+    long *durationMillisec = calloc(1, sizeof(long));
+    assert(durationMillisec);
 
     if (!timeFrom) {
-        //Timeval
-        struct timeval timeVal;
-        gettimeofday(&timeVal, NULL);
-        *sec = timeVal.tv_sec;
-        *millisec = timeVal.tv_usec/1000.0;
-        if (*millisec >= 1000) {
-            *millisec -= 1000;
-            (*sec)++;
+        /* Get the second with CLOCK_REALTIME */
+        struct timespec timeSpec = {0};
+        clock_gettime(CLOCK_REALTIME, &timeSpec);
+        *sec = timeSpec.tv_sec;
+
+        //Duration
+        struct timespec durationSpec = {0};
+        /* We use CLOCK_MONOTONIC because the duration must not be affected by system time changing */
+        clock_gettime(CLOCK_MONOTONIC, &durationSpec);
+        *durationSec = durationSpec.tv_sec;
+        *durationMillisec = round(durationSpec.tv_nsec / 1.0e6); // Convert nanoseconds to milliseconds
+        if (*durationMillisec > 999) {
+            (*durationSec)++;
+            *durationMillisec = 0;
         }
     }
     else {
         *sec = *timeFrom->sec;
-        *millisec = *timeFrom->millisec;
+        /* Duration */
+        *durationSec = *timeFrom->durationSec;
+        *durationMillisec = *timeFrom->durationMillisec;
     }
 
     time->sec = sec;
-    time->millisec = millisec;
+    time->durationSec = durationSec;
+    time->durationMillisec = durationMillisec;
 
     return time;
 }
@@ -69,7 +82,8 @@ timeRelease(Time **time)
     Time *timeTemp = *time;
     if (timeTemp) {
         objectRelease(&timeTemp->sec);
-        objectRelease(&timeTemp->millisec);
+        objectRelease(&timeTemp->durationSec);
+        objectRelease(&timeTemp->durationMillisec);
         objectRelease(time);
     }
 }
@@ -83,36 +97,23 @@ timeSetCurrent(Time **time)
 }
 
 void
-stringSetTimeStamp(char **ret, Time *time, bool hasMilliseconds)
+stringSetTimeStamp(char **ret, Time *time)
 {
     char dateTimeStr[50] = {0};
-    char millisecStr[5] = {0};
-    long millisec = 0;
 
-    struct timeval tv;
-    if (time) {
+    struct timespec tv;
+    if (time)
         tv.tv_sec = *time->sec;
-        millisec = *time->millisec;
-    }
-    else {
-        gettimeofday(&tv, NULL);
-        millisec = tv.tv_usec/1000.0;
-        if (millisec >= 1000) {
-            millisec -= 1000;
-            tv.tv_sec++;
-        }
-    }
+    else
+        clock_gettime(CLOCK_REALTIME, &tv);
 
     struct tm *timeInfo = localtime(&tv.tv_sec);
-
     strftime(dateTimeStr, 50, "%d %B %Y %H:%M:%S", timeInfo);
-    if (hasMilliseconds) {
-        sprintf(millisecStr, ".%03ld", millisec);
-        strcat(dateTimeStr, millisecStr);
-    }
+
     objectRelease(ret);
     *ret = stringNew(dateTimeStr);
 }
+
 
 void
 stringSetDiffTime(char **ret, Time *timeEnd, Time *timeStart)
@@ -121,9 +122,9 @@ stringSetDiffTime(char **ret, Time *timeEnd, Time *timeStart)
     int day, hour, min, sec;
     day = hour = min = sec = -1;
 
-    double diffTime = difftime(*timeEnd->sec, *timeStart->sec);
-    long *millisecStart = timeStart->millisec;
-    long *millisecEnd = timeEnd->millisec;
+    double diffTime = difftime(*timeEnd->durationSec, *timeStart->durationSec);
+    long *millisecStart = timeStart->durationMillisec;
+    long *millisecEnd = timeEnd->durationMillisec;
 
     if (diffTime > 0) {
         long diffMillisec = (1000 - *millisecStart + *millisecEnd);
@@ -154,17 +155,17 @@ stringSetDiffTime(char **ret, Time *timeEnd, Time *timeStart)
             strcat(timeStr, dayStr);
         }
         if (hour != -1 && hour > 0) {
-            char hourStr[10] = {0};
+            char hourStr[20] = {0};
             sprintf(hourStr, "%dh ", hour);
             strcat(timeStr, hourStr);
         }
         if (min != -1 && min > 0) {
-            char minStr[10] = {0};
+            char minStr[20] = {0};
             sprintf(minStr, "%dm ", min);
             strcat(timeStr, minStr);
         }
         if (sec != -1) {
-            char secStr[10] = {0};
+            char secStr[40] = {0};
             sprintf(secStr, "%d.%lds ", sec, diffMillisec);
             strcat(timeStr, secStr);
         }
