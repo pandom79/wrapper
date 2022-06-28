@@ -114,7 +114,6 @@ stringSetTimeStamp(char **ret, Time *time)
     *ret = stringNew(dateTimeStr);
 }
 
-
 void
 stringSetDiffTime(char **ret, Time *timeEnd, Time *timeStart)
 {
